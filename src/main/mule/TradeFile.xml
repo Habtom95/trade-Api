@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<sub-flow name="process-trade-file-subflow" doc:id="ea0852e8-2e05-4630-99c2-0478c52d7f57" >
+		<logger level="INFO" doc:name="Logger" doc:id="91fe9551-5a03-4056-bbe5-4fc7226298cd" message='#["incoming data recieved into file correlationId: " ++ correlationId]'/>
+		<choice doc:name="Choice" doc:id="fba5590e-b655-42b2-a7f4-f790c7df9340" >
+			<when expression='#[lower(payload."type") =="equity"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="89ddb412-bac8-4338-b04d-6052b4b2c6ab" message='#["succefully equity trade correlationId: " ++ correlationId]'/>
+				<ee:transform doc:name="set filePath" doc:id="d6e967e5-06c0-4aba-b083-335fdeb4620a">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="filePath" ><![CDATA[%dw 2.0
+output application/json
+---
+
+p("equity.filePath") ++ (p("equity.fileName") ++ (now() as String {format:"yyyy_MM_dd_HH_mm_ss"}) ++ ".json")]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="create-file-subflow" doc:id="e45998f9-0e52-415b-9a7c-4f35cf84060c" name="create-file-subflow"/>
+				<ee:transform doc:name="set respond" doc:id="376669d9-ebb8-4c64-abb1-1e007c6fad40" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "trade processed successfully"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[lower(payload."type") =="fx"]'>
+				<logger level="INFO" doc:name="Logger" doc:id="ad9b1da6-3502-4a4e-9877-583daab1b41b" message='#["succesfull fx trade correlationId: " ++ correlationId]'/>
+				<ee:transform doc:name="set filePath" doc:id="2244fe00-7fd2-4244-b771-70a58fde50f7">
+					<ee:message>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="filePath" ><![CDATA[%dw 2.0
+output application/java
+---
+
+p("fx.filePath") ++ (p("fx.fileName") ++ (now() as String {format:"yyyy_MM_dd_HH_mm_ss"}) ++ ".json")]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="create-file-subflow" doc:id="c12d6027-50f4-4347-b115-a107c008cc1f" name="create-file-subflow"/>
+				<ee:transform doc:name="set respond" doc:id="e8a59e0b-584f-4ab3-abdf-5a20878f983a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "trade processed successfully"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="bf6c6625-6d92-4146-85b1-7b56c5a3f74f" message='#["undefined trade correlationId: " ++ correlationId]'/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="create-file-subflow" doc:id="f12c559a-6ed8-455e-99bc-0753ba27590b" >
+		<try doc:name="Try" doc:id="c33579c8-1faf-4b92-9cdf-8d2e49e0a7be" >
+			<logger level="INFO" doc:name="Logger" doc:id="53c08d25-560e-47c8-949f-0b891c799de8" message='#["ready to create file correlationId: " ++ correlationId]' />
+			<file:write doc:name="Write" doc:id="81e5dd3f-ffb2-4ea7-aa45-ca74b74069ae" path="#[vars.filePath]" />
+			<logger level="INFO" doc:name="Logger" doc:id="4e2b384c-ddfc-4677-a73c-0e9152b1a262" message='#["succesfull created file correlationId: " ++ correlationId]' />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d7b64609-559f-4f75-9350-578e51fab2c5" >
+					<flow-ref doc:name="Flow Reference" doc:id="aa4ddfd8-b784-4378-b8a0-032c93283a74" name="global_configuration-error-response-subflow"/>
+					<logger level="ERROR" doc:name="Logger" doc:id="65b563ae-e211-4ae5-807a-b82871593c42" message='#["error accure while excuting the transaction, correlationId:" ++ correlationId]' />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</sub-flow>
+</mule>
