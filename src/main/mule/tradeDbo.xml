@@ -6,22 +6,6 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	
-	<flow name="tradeDboFlow" doc:id="a53494b3-63e1-4bee-ad90-a9fc8694f111" >
-		<logger level="INFO" doc:name="Logger" doc:id="b1418cee-ffb4-4f0d-965d-df9fefade415" />
-		<db:select doc:id="d4503f34-e142-407f-a320-1199e2b6a226" config-ref="Database_Config">
-			<db:sql ><![CDATA[select * from dbo.equity]]></db:sql>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="7c34603c-34b7-4865-9302-ca877c93b67b" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="2259db5b-461f-4d5d-8350-cb07ac326273" message="#[payload]"/>
-	</flow>
 	<sub-flow name="process-trade-dbo-subflow" doc:id="c5440859-edc3-45ad-9b6a-1aae8bb364b7" >
 		<logger level="INFO" doc:name="Logger" doc:id="f0379932-fbac-463e-9a5a-eecebca91897" message='#["incoming data recieved into Dbo correlationId: " ++ correlationId]'/>
 		<choice doc:name="Choice" doc:id="d8f9561b-643a-432a-81d2-63bdfb1c77dc" >
