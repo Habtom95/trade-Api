@@ -13,7 +13,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<configuration-properties doc:name="Configuration properties" doc:id="377187e6-bf43-4131-bc7b-e18d4c7df801" file="environments/${env}.properties" />
 	<configuration doc:name="Configuration" doc:id="b7a41651-25d7-46ec-b721-4bc726995c5e" defaultErrorHandler-ref="global_configurationError_Handler" />
  <db:config name="Database_Config" doc:name="Database Config" doc:id="f0b77298-9b75-4160-b9a0-fe364b7ac5b4" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="NatanHab@2012" database="notesapp" />
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}" />
 	</db:config>	
 	<http:listener-config name="trading-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
