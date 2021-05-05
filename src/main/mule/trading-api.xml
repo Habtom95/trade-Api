@@ -120,9 +120,9 @@ output application/json
         </error-handler>
     </flow>
     <flow name="post:\trade\file:application\json:trading-api-config">
-        <flow-ref doc:name="process-trade-file-subflow" doc:id="df432550-e186-4b7a-a398-c9ff43ccd8d0" name="process-trade-file-subflow"/>
+        <flow-ref doc:name="process-trade-file-subflow" doc:id="df432550-e186-4b7a-a398-c9ff43ccd8d0" name="process-trade-file-subflow" />
     </flow>
-    <flow name="post:\trade\ods:application\json:trading-api-config">
-		<flow-ref doc:name="process-trade-dbo-subflow" doc:id="4eac0451-486e-4639-8c3a-b9e01fdbcb66" name="process-trade-dbo-subflow"/>
+    <flow name="post:\trades\ods:application\json:trading-api-config">
+        <flow-ref doc:name="process-trade-dbo-subflow" doc:id="4eac0451-486e-4639-8c3a-b9e01fdbcb66" name="trades-subflow-dbo" />
     </flow>
 </mule>

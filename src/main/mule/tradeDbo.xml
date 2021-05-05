@@ -6,22 +6,21 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	
-	<flow name="tradeDboFlow" doc:id="a53494b3-63e1-4bee-ad90-a9fc8694f111" >
-		<logger level="INFO" doc:name="Logger" doc:id="b1418cee-ffb4-4f0d-965d-df9fefade415" />
-		<db:select doc:id="d4503f34-e142-407f-a320-1199e2b6a226" config-ref="Database_Config">
-			<db:sql ><![CDATA[select * from dbo.equity]]></db:sql>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="7c34603c-34b7-4865-9302-ca877c93b67b" >
+	<sub-flow name="trades-subflow-dbo" doc:id="08fea0b2-b4a2-48a5-bc51-b7f8af122193" >
+		<foreach doc:name="For Each" doc:id="1a01142a-03d0-481f-975f-131771ded0fd" collection="#[payload]">
+			<flow-ref doc:name="process-trade-dbo-subflow" doc:id="7c9b4668-b6b0-4b46-b2c3-98dc23261bbe" name="process-trade-dbo-subflow"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="bbfde8a7-c8ee-4d82-99ea-9757fe19c73e" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+{
+  status: "trade processed successfully"
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="2259db5b-461f-4d5d-8350-cb07ac326273" message="#[payload]"/>
-	</flow>
+	</sub-flow>
 	<sub-flow name="process-trade-dbo-subflow" doc:id="c5440859-edc3-45ad-9b6a-1aae8bb364b7" >
 		<logger level="INFO" doc:name="Logger" doc:id="f0379932-fbac-463e-9a5a-eecebca91897" message='#["incoming data recieved into Dbo correlationId: " ++ correlationId]'/>
 		<choice doc:name="Choice" doc:id="d8f9561b-643a-432a-81d2-63bdfb1c77dc" >
@@ -49,16 +48,6 @@ values
 					</ee:variables>
 				</ee:transform>
 				<flow-ref doc:name="trade-insert-dbo-subflow" doc:id="3806cbbb-c73c-48c7-9cb3-00f929a51098" name="trade-insert-dbo-subflow"/>
-				<ee:transform doc:name="Transform Message" doc:id="99fd06fa-4192-4908-b1ae-642d276dad96" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-  status: "trade processed successfully"
-}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
 			</when>
 			<when expression='#[lower(payload."type") =="fx"]'>
 				<logger level="INFO" doc:name="Logger" doc:id="7989a4cc-25c1-4497-a11a-917512073ead" message='#["succefully fx trade correlationId: " ++ correlationId]'/>
@@ -84,16 +73,6 @@ values
 					</ee:variables>
 				</ee:transform>
 				<flow-ref doc:name="Flow Reference" doc:id="b28bb8d3-bd5c-4738-a933-daeaf606d721" name="trade-insert-dbo-subflow"/>
-				<ee:transform doc:name="Transform Message" doc:id="0b52df87-2812-417c-9e17-cce74fd82e5d" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-  status: "trade processed successfully"
-}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
 			</when>
 			<otherwise >
 				<logger level="INFO" doc:name="Logger" doc:id="bc35b3dd-05a9-4463-89a6-dea0b3f9b0b9" message='#["unsuccefully trade correlationId: " ++ correlationId]'/>

@@ -1,40 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<configuration-properties doc:name="Configuration properties" doc:id="377187e6-bf43-4131-bc7b-e18d4c7df801" file="environments/${env}.properties" />
-	<configuration doc:name="Configuration" doc:id="b7a41651-25d7-46ec-b721-4bc726995c5e" defaultErrorHandler-ref="global_configurationError_Handler" />
- <db:config name="Database_Config" doc:name="Database Config" doc:id="f0b77298-9b75-4160-b9a0-fe364b7ac5b4" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="NatanHab@2012" database="notesapp" />
-	</db:config>	
-	<http:listener-config name="trading-api-httpListenerConfig">
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+    <configuration-properties doc:name="Configuration properties" doc:id="377187e6-bf43-4131-bc7b-e18d4c7df801" file="environments/${env}.properties" />
+    <configuration doc:name="Configuration" doc:id="b7a41651-25d7-46ec-b721-4bc726995c5e" defaultErrorHandler-ref="global_configurationError_Handler" />
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="f0b77298-9b75-4160-b9a0-fe364b7ac5b4">
+        <db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${secure::db.password}" database="${db.database}" />
+    </db:config>
+    <http:listener-config name="trading-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="trading-api-config" api="resource::fa42a077-8460-4da4-8ec5-f430bae73cee:trading-api:1.0.1:raml:zip:trading-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    
-	
-	<error-handler name="global_configurationError_Handler" doc:id="4c65e8d2-ff3a-4983-a193-9742fbb38d41" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="30181257-84a1-4f6b-857d-6d14cdff2723" >
-			<flow-ref doc:name="global_configuration-error-response-subflow" doc:id="bc64c1d2-2419-4358-a839-6a210771c441" name="global_configuration-error-response-subflow"/>
-		</on-error-propagate>
-	</error-handler>
-	<sub-flow name="global_configuration-error-response-subflow" doc:id="d58fbe0d-fd3f-4709-8985-dc6301c47064" >
-		<ee:transform doc:name="Transform Message" doc:id="1d791f8c-44ec-428c-9c26-1c5d3999badd" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+    <apikit:config name="trading-api-config" api="resource::fa42a077-8460-4da4-8ec5-f430bae73cee:trading-api:1.0.2:raml:zip:trading-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="eaa3decb-b4e7-42fb-869d-274ff4e2d460" file="environments/local.secure.properties" key="9876543219876543" >
+		<secure-properties:encrypt mode="ECB" />
+	</secure-properties:config>
+	<error-handler name="global_configurationError_Handler" doc:id="4c65e8d2-ff3a-4983-a193-9742fbb38d41">
+        <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="30181257-84a1-4f6b-857d-6d14cdff2723">
+            <flow-ref doc:name="global_configuration-error-response-subflow" doc:id="bc64c1d2-2419-4358-a839-6a210771c441" name="global_configuration-error-response-subflow" />
+        </on-error-propagate>
+    </error-handler>
+    <sub-flow name="global_configuration-error-response-subflow" doc:id="d58fbe0d-fd3f-4709-8985-dc6301c47064">
+        <ee:transform doc:name="Transform Message" doc:id="1d791f8c-44ec-428c-9c26-1c5d3999badd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/java
 ---
 {
 }]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</sub-flow>
+            </ee:message>
+        </ee:transform>
+    </sub-flow>
 </mule>
